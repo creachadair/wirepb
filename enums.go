@@ -17,6 +17,7 @@ func (v Type) Valid() bool { return v._Type > 0 && int(v._Type) < len(_str_Type)
 // Index returns the integer index of Type v.
 func (v Type) Index() int { return _idx_Type[v._Type] }
 
+// Values for low-level wire types.
 var (
 	_str_Type = []string{"<invalid>", "Varint", "I64", "Len", "StartGroup", "EndGroup", "I32"}
 	_idx_Type = []int{0, 0, 1, 2, 3, 4, 5}

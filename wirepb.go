@@ -15,6 +15,7 @@ import (
 /*enumgen:type Type
 doc: Type is a protobuf wire type code.
 zero: Invalid
+val-doc: Values for low-level wire types.
 values:
   - name: Varint
     doc: Base 128 varint
