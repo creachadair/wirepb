@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
-	"io"
 	"math"
 	"testing"
 
@@ -18,20 +17,20 @@ func TestScanner(t *testing.T) {
 	}
 
 	s := wirepb.NewScanner(bytes.NewReader(input))
-	for s.Next() == nil {
+	for s.Next() {
 		t.Logf("id=%d %s %v", s.ID(), s.Type(), s.Data())
 		if s.Type() == wirepb.Len && s.ID() == 1 {
 			s2 := wirepb.NewScanner(bytes.NewReader(s.Data()))
-			for s2.Next() == nil {
+			for s2.Next() {
 				t.Logf("| id=%d %s %v", s2.ID(), s2.Type(), s2.Data())
 			}
-			if err := s2.Err(); err != io.EOF {
-				t.Errorf("| Scanner err: got %v, want io.EOF", err)
+			if err := s2.Err(); err != nil {
+				t.Errorf("| Scanner unexpected error: %v", err)
 			}
 		}
 	}
-	if err := s.Err(); err != io.EOF {
-		t.Errorf("Scanner err: got %v, want io.EOF", err)
+	if err := s.Err(); err != nil {
+		t.Errorf("Scanner unexpected error: %v", err)
 	}
 }
 
@@ -57,8 +56,10 @@ func TestBuilder(t *testing.T) {
 	s := wirepb.NewScanner(bytes.NewReader(b.Bytes()))
 	var pos int
 	advance := func() {
-		if err := s.Next(); err != nil && err != io.EOF {
-			t.Fatalf("Advance scanner: %v", err)
+		if !s.Next() {
+			if err := s.Err(); err != nil {
+				t.Fatalf("Advance scanner: %v", err)
+			}
 		}
 		pos++
 	}
@@ -85,15 +86,15 @@ func TestBuilder(t *testing.T) {
 	check(5, wirepb.Varint, []byte{100})
 	check(6, wirepb.I64, binary.LittleEndian.AppendUint64(nil, math.Float64bits(3.14159)))
 	advance()
-	if s.Err() != io.EOF {
-		t.Errorf("Unexpected error at end of message (pos=%d, want EOF): %v", pos, s.Err())
+	if s.Err() != nil {
+		t.Errorf("Unexpected error at end of message (pos=%d): %v", pos, s.Err())
 	}
 	s, pos = save, sp
 
 	check(7, wirepb.I32, []byte{0x4e, 0x61, 0xbc, 0}) // 12345678 in little-endian hex
 	check(3, wirepb.Len, []byte("world"))
 	advance()
-	if s.Err() != io.EOF {
-		t.Errorf("Unexpected error at end of message (pos=%d, want EOF): %v", pos, s.Err())
+	if s.Err() != nil {
+		t.Errorf("Unexpected error at end of message (pos=%d): %v", pos, s.Err())
 	}
 }

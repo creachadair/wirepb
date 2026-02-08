@@ -60,9 +60,10 @@ func (s *Scanner) Data() []byte { return s.data }
 // ID returns the field ID of the current token, or -1 if there is no token.
 func (s *Scanner) ID() int { return s.id }
 
-// Next advances s to the next token of the input or reports an error.  At the
-// end of the input, Next returns io.EOF.
-func (s *Scanner) Next() error {
+// Next advances s to the next token of the input and reports whether a new
+// token is available. If Next reports false, [Scanner.Err] can be used to
+// recover the error.  At the end of the input, the error is nil.
+func (s *Scanner) Next() bool {
 	s.tok = Invalid
 	s.id = -1
 	s.data = nil
@@ -70,7 +71,7 @@ func (s *Scanner) Next() error {
 
 	tag, err := binary.ReadUvarint(s.r)
 	if err == io.EOF {
-		return s.fail(err) // return unwrapped
+		return false // no error, ordinary end of input
 	} else if err != nil {
 		return s.failf("read tag: %w", err)
 	}
@@ -111,12 +112,13 @@ func (s *Scanner) Next() error {
 		return s.failf("invalid wire type %d", wtype)
 	}
 	s.id = int(id)
-	return nil
+	return true
 }
 
-// Err returns the last error reported by Next, or nil if none.
+// Err returns the last error reported by a call to [Scanner.Next].
+// At the end of input, [Scanner.Next] returns false and Err reports nil.
 func (s *Scanner) Err() error { return s.err }
 
-func (s *Scanner) fail(err error) error { s.err = err; return err }
+func (s *Scanner) fail(err error) bool { s.err = err; return false }
 
-func (s *Scanner) failf(msg string, args ...any) error { return s.fail(fmt.Errorf(msg, args...)) }
+func (s *Scanner) failf(msg string, args ...any) bool { return s.fail(fmt.Errorf(msg, args...)) }
