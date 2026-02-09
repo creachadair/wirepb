@@ -10,7 +10,7 @@ import (
 	"io"
 )
 
-//go:generate go run github.com/creachadair/enumgen@latest -output enums.go
+//go:generate go run github.com/creachadair/enumgen -output enums.go
 
 /*enumgen:type Type
 doc: Type is a protobuf wire type code.
