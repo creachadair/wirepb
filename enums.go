@@ -5,9 +5,6 @@ package wirepb
 // Type is a protobuf wire type code.
 type Type struct{ _Type uint8 }
 
-// Enum returns the name of the enumeration type for Type.
-func (Type) Enum() string { return "Type" }
-
 // String returns the string representation of Type v.
 func (v Type) String() string { return _str_Type[v._Type] }
 
