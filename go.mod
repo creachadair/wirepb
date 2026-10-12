@@ -3,7 +3,6 @@ module github.com/creachadair/wirepb
 go 1.26.0
 
 require (
-	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c // indirect
 	github.com/creachadair/enumgen v0.6.2 // indirect
 	github.com/creachadair/mds v0.30.5 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20231108232855-2478ac86f678 // indirect
